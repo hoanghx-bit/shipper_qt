@@ -36,9 +36,24 @@
 
         /* Dashboard thống kê */
         .stats-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .stat-card { background: white; padding: 10px 5px; border-radius: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
-        .stat-card span { font-size: 10px; color: #636e72; font-weight: bold; text-transform: uppercase; }
-        .stat-card b { display: block; font-size: 12px; margin-top: 4px; color: var(--dark); }
+        .stat-card { 
+    background: white; 
+    padding: 10px 2px; /* Giảm padding hai bên */
+    border-radius: 12px; 
+    text-align: center; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+    border-top: 4px solid var(--primary); 
+    min-width: 0; /* Cho phép co giãn */
+    overflow: hidden; /* Tránh tràn khung */
+}
+
+.stat-card b { 
+    display: block; 
+    font-size: 11px; /* Giảm cỡ chữ từ 13px xuống 11px để hiện đủ số tiền lớn */
+    margin-top: 4px; 
+    color: var(--dark);
+    white-space: nowrap; /* Không cho xuống dòng */
+}
 
         /* Khung bản đồ và nhập liệu */
         .card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 15px; }
