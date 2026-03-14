@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shipper Quảng Trị Pro</title>
+    
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/6947/6947616.png">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Shipper QT">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/6947/6947616.png">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    
+    <style>
+        :root { --primary: #00b894; --secondary: #0984e3; --danger: #d63031; --bg: #f5f6fa; --dark: #2d3436; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: var(--bg); padding-bottom: 75px; color: var(--dark); }
+        
+        /* Header chuyên nghiệp với Logo */
+        header { 
+            background: var(--primary); color: white; padding: 12px; text-align: center; 
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+        }
+        header img { width: 42px; height: 42px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+        .header-info { text-align: left; }
+        .header-info h3 { margin: 0; font-size: 18px; letter-spacing: 0.5px; }
+        .header-info small { opacity: 0.9; font-size: 11px; }
+
+        .container { padding: 15px; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Dashboard thống kê */
+        .stats-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .stat-card { background: white; padding: 10px 5px; border-radius: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
+        .stat-card span { font-size: 10px; color: #636e72; font-weight: bold; text-transform: uppercase; }
+        .stat-card b { display: block; font-size: 12px; margin-top: 4px; color: var(--dark); }
+
+        /* Khung bản đồ và nhập liệu */
+        .card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 15px; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        input { flex: 1; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1); }
+        
+        #map { height: 350px; width: 100%; border-radius: 15px; border: 1px solid #eee; margin-bottom: 12px; z-index: 1; }
+
+        .result-panel { background: #e3f2fd; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; margin-bottom: 15px; border: 1px solid #bbdefb; }
+        .result-panel div { text-align: center; flex: 1; }
+        .result-panel b { display: block; font-size: 17px; color: #1565c0; margin-top: 2px; }
+        .result-panel span { font-size: 11px; color: #546e7a; font-weight: bold; text-transform: uppercase; }
+
+        /* Nút bấm */
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; display: flex; align-items: center; justify-content: center; text-decoration: none; gap: 8px; box-sizing: border-box; }
+        .btn-search { background: var(--secondary); color: white; width: 70px; margin-bottom: 0; padding: 0; }
+        .btn-primary { background: var(--primary); color: white; margin-top: 10px; }
+        .btn-nav { background: #ff9f43; color: white; margin-bottom: 12px; }
+        .btn:active { transform: scale(0.97); opacity: 0.9; }
+
+        /* Thanh điều hướng Bottom Nav */
+        .nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; height: 65px; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; color: #999; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 20px; margin-bottom: 2px; }
+
+        /* Danh sách lịch sử */
+        .history-item { background: white; padding: 14px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .history-info div { font-weight: bold; font-size: 14px; margin-bottom: 3px; color: var(--dark); }
+        .history-info small { color: #999; font-size: 11px; }
+        .history-amount { color: var(--danger); font-weight: 800; font-size: 15px; }
+
+        .leaflet-routing-container { display: none !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="https://cdn-icons-png.flaticon.com/512/6947/6947616.png" alt="Logo">
+    <div class="header-info">
+        <h3>QUẢNG TRỊ SHIPPER</h3>
+        <small>Dẫn đường & Tính phí thực tế</small>
+    </div>
+</header>
+
+<div class="container">
+    <div id="page-home" class="page active">
+        <div class="stats-container">
+            <div class="stat-card"><span>Hôm nay</span><b id="stat-day">0đ</b></div>
+            <div class="stat-card" style="border-top-color: var(--secondary);"><span>Tuần này</span><b id="stat-week">0đ</b></div>
+            <div class="stat-card" style="border-top-color: #9b59b6;"><span>Tháng này</span><b id="stat-month">0đ</b></div>
+        </div>
+
+        <div class="card">
+            <div class="input-group">
+                <input type="text" id="destAddress" placeholder="Nhập tên đường, địa danh tại Quảng Trị...">
+                <button class="btn btn-search" onclick="findAddress()">TÌM</button>
+            </div>
+
+            <div id="map"></div>
+
+            <div class="result-panel">
+                <div><span>Khoảng cách</span><b id="out-dist">0</b><span>KM</span></div>
+                <div><span>Phí dịch vụ</span><b id="out-fare">0</b><span>VNĐ</span></div>
+            </div>
+
+            <div id="nav-btn-box" style="display: none;">
+                <a id="googleNavBtn" href="#" target="_blank" class="btn btn-nav">🚀 MỞ GOOGLE MAPS DẪN ĐƯỜNG</a>
+            </div>
+            
+            <input type="number" id="codAmount" placeholder="Tiền COD thu hộ (nếu có)" style="width:100%; margin-bottom:10px; box-sizing: border-box;">
+
+            <button class="btn btn-primary" onclick="handleSave()">✅ HOÀN THÀNH & LƯU ĐƠN</button>
+        </div>
+    </div>
+
+    <div id="page-history" class="page">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin:0;">Lịch sử đơn hàng</h3>
+            <button onclick="clearHistory()" style="background:none; border:none; color:var(--danger); font-size:12px; font-weight:bold; cursor:pointer;">XÓA TẤT CẢ</button>
+        </div>
+        <div id="history-list"></div>
+    </div>
+</div>
+
+<div class="nav">
+    <div class="nav-item active" onclick="showPage('home')">
+        <span class="nav-icon">🏠</span><span>Tạo đơn</span>
+    </div>
+    <div class="nav-item" onclick="showPage('history')">
+        <span class="nav-icon">📜</span><span>Lịch sử</span>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<script>
+    // 1. Khởi tạo bản đồ tại trung tâm Đông Hà, Quảng Trị
+    var map = L.map('map', { zoomControl: false }).setView([16.8173, 107.0988], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    var startPt = null, endPt = null, routingControl = null, endMarker = null;
+
+    // 2. Lấy vị trí GPS chính xác cao
+    function getGPS() {
+        navigator.geolocation.getCurrentPosition(pos => {
+            startPt = L.latLng(pos.coords.latitude, pos.coords.longitude);
+            map.setView(startPt, 15);
+            L.circleMarker(startPt, {radius: 8, color: 'white', fillColor: '#0984e3', fillOpacity: 1, weight: 3}).addTo(map).bindPopup("Bạn đang ở đây");
+        }, err => {
+            alert("Vui lòng bật GPS và dùng HTTPS để app hoạt động!");
+        }, { enableHighAccuracy: true });
+    }
+    getGPS();
+
+    // 3. Chọn điểm trên bản đồ bằng cách chạm
+    map.on('click', e => calculateRoute(e.latlng));
+
+    // 4. Tìm kiếm địa chỉ khoanh vùng Quảng Trị
+    async function findAddress() {
+        let input = document.getElementById('destAddress').value;
+        if(!input) return;
+        let query = `${input}, Quảng Trị, Việt Nam`;
+        try {
+            let resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+            let data = await resp.json();
+            if(data.length > 0) {
+                let dest = L.latLng(data[0].lat, data[0].lon);
+                calculateRoute(dest);
+                map.setView(dest, 16);
+            } else {
+                alert("Không tìm thấy! Bạn hãy ghim tay trên bản đồ nhé.");
+            }
+        } catch(e) { alert("Lỗi kết nối bản đồ!"); }
+    }
+
+    // 5. Vẽ đường đi thực tế và tính phí
+    function calculateRoute(destLatLng) {
+        if (!startPt) return alert("Đang lấy tín hiệu GPS...");
+        if (routingControl) map.removeControl(routingControl);
+        if (endMarker) map.removeLayer(endMarker);
+
+        endPt = destLatLng;
+        endMarker = L.marker(endPt, {
+            icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                iconSize: [25, 41], iconAnchor: [12, 41]
+            })
+        }).addTo(map);
+
+        routingControl = L.Routing.control({
+            waypoints: [startPt, endPt],
+            lineOptions: { styles: [{ color: '#0984e3', weight: 6 }] },
+            createMarker: function() { return null; }
+        }).addTo(map);
+
+        routingControl.on('routesfound', function(e) {
+            let d = e.routes[0].summary.totalDistance / 1000;
+            document.getElementById('out-dist').innerText = d.toFixed(2);
+            
+            // Công thức tính tiền của bạn
+            let fare = 0;
+            if (d <= 2) fare = 15000;
+            else if (d <= 3) fare = 20000;
+            else fare = 15000 + (Math.ceil(d - 2) * 10000);
+            
+            document.getElementById('out-fare').innerText = fare.toLocaleString();
+            document.getElementById('nav-btn-box').style.display = 'block';
+            document.getElementById('googleNavBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${endPt.lat},${endPt.lng}&travelmode=driving`;
+        });
+    }
+
+    // 6. Lưu dữ liệu & Thống kê
+    function handleSave() {
+        let fareStr = document.getElementById('out-fare').innerText.replace(/,/g, '');
+        let fare = parseInt(fareStr);
+        if(!fare || fare === 0) return alert("Vui lòng chọn điểm giao!");
+
+        let order = {
+            id: Date.now(),
+            date: new Date().toLocaleString('vi-VN'),
+            amount: fare,
+            address: document.getElementById('destAddress').value || "Điểm ghim bản đồ"
+        };
+
+        let history = JSON.parse(localStorage.getItem('shipper_qt_pro_v1') || '[]');
+        history.unshift(order);
+        localStorage.setItem('shipper_qt_pro_v1', JSON.stringify(history));
+
+        alert("🚀 Đã lưu đơn hàng thành công!");
+        updateStats();
+        resetForm();
+    }
+
+    function updateStats() {
+        let history = JSON.parse(localStorage.getItem('shipper_qt_pro_v1') || '[]');
+        let now = new Date();
+        let d = 0, w = 0, m = 0;
+        
+        history.forEach(item => {
+            let itemDate = new Date(item.id);
+            if(itemDate.toDateString() === now.toDateString()) d += item.amount;
+            if(itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear()) m += item.amount;
+            if(Math.abs(now - itemDate) / 86400000 <= 7) w += item.amount;
+        });
+
+        document.getElementById('stat-day').innerText = d.toLocaleString() + "đ";
+        document.getElementById('stat-week').innerText = w.toLocaleString() + "đ";
+        document.getElementById('stat-month').innerText = m.toLocaleString() + "đ";
+    }
+
+    function updateHistory() {
+        let history = JSON.parse(localStorage.getItem('shipper_qt_pro_v1') || '[]');
+        document.getElementById('history-list').innerHTML = history.map(item => `
+            <div class="history-item">
+                <div class="history-info">
+                    <div>${item.address}</div>
+                    <small>${item.date}</small>
+                </div>
+                <div class="history-amount">+${item.amount.toLocaleString()}đ</div>
+            </div>
+        `).join('') || '<p style="text-align:center; color:#999; margin-top:30px;">Chưa có đơn hàng nào.</p>';
+    }
+
+    function showPage(p) {
+        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('page-'+p).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(p === 'history') updateHistory();
+    }
+
+    function resetForm() {
+        document.getElementById('destAddress').value = "";
+        document.getElementById('codAmount').value = "";
+        document.getElementById('out-dist').innerText = "0";
+        document.getElementById('out-fare').innerText = "0";
+        document.getElementById('nav-btn-box').style.display = 'none';
+        if(routingControl) map.removeControl(routingControl);
+        if(endMarker) map.removeLayer(endMarker);
+        endPt = null;
+    }
+
+    function clearHistory() { if(confirm("Xóa toàn bộ doanh thu?")) { localStorage.removeItem('shipper_qt_pro_v1'); location.reload(); } }
+
+    window.onload = updateStats;
+</script>
+</body>
+</html>
