@@ -19,45 +19,50 @@
         body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg); padding-bottom: 80px; color: var(--dark); }
 
         header { background: var(--primary); color: white; padding: 10px 15px; position: sticky; top: 0; z-index: 1000; display: flex; align-items: center; gap: 10px; }
-        header img { width: 38px; height: 38px; }
-        .header-info h3 { margin: 0; font-size: 16px; text-transform: uppercase; }
-        .header-info small { opacity: 0.8; font-size: 10px; display: block; }
+        header img { width: 35px; height: 35px; }
+        .header-info h3 { margin: 0; font-size: 15px; text-transform: uppercase; }
 
-        .container { padding: 12px; }
+        .container { padding: 10px; }
         .page { display: none; }
         .page.active { display: block; }
 
         /* Stats */
         .stats-container { display: flex; gap: 6px; margin-bottom: 12px; }
         .stat-card { flex: 1; background: white; padding: 10px 4px; border-radius: 12px; text-align: center; border-top: 4px solid var(--primary); min-width: 0; }
-        .stat-card span { font-size: 9px; color: #636e72; font-weight: bold; display: block; }
-        .stat-card b { display: block; font-size: 3.2vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stat-card span { font-size: 8px; color: #636e72; font-weight: bold; display: block; }
+        .stat-card b { display: block; font-size: 3.2vw; white-space: nowrap; overflow: hidden; }
 
-        /* Form */
+        /* Card & Map */
         .card { background: white; border-radius: 16px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 12px; }
         .search-box { display: flex; gap: 6px; margin-bottom: 10px; }
         input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; outline: none; }
-        #map { height: 300px; width: 100%; border-radius: 12px; border: 1px solid #eee; }
+        #map { height: 280px; width: 100%; border-radius: 12px; border: 1px solid #eee; }
 
-        /* Calculation Panel */
+        /* Result Panel */
         .result-panel { background: #fff; border-radius: 10px; padding: 12px; margin: 12px 0; border: 1.5px dashed var(--secondary); }
         .calc-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
         .calc-total { border-top: 1px solid #eee; margin-top: 8px; padding-top: 8px; font-weight: bold; color: var(--danger); font-size: 16px; display: flex; justify-content: space-between; }
 
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; text-decoration: none; gap: 8px; margin-bottom: 8px; }
-        .btn-search { background: var(--secondary); color: white; width: 65px; margin-bottom: 0; }
+        /* Buttons */
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; text-decoration: none; gap: 8px; }
+        .btn-search { background: var(--secondary); color: white; width: 65px; }
         .btn-primary { background: var(--primary); color: white; margin-top: 10px; }
-        .btn-nav { background: #ff9f43; color: white; }
+        .btn-nav { background: #ff9f43; color: white; margin-top: 8px; }
 
+        /* Nav */
         .nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; height: 65px; z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; font-size: 12px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; font-size: 11px; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
 
-        .history-item { background: white; padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid var(--primary); }
-        .history-top { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-bottom: 4px; }
-        .history-sub { font-size: 11px; color: #777; display: flex; justify-content: space-between; }
+        /* History */
+        .history-item { background: white; padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid var(--primary); position: relative; }
+        .history-top { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-bottom: 4px; padding-right: 25px; }
+        .btn-delete-item { position: absolute; right: 10px; top: 12px; color: #ccc; font-size: 18px; cursor: pointer; }
 
-        .leaflet-routing-container { display: none !important; }
+        /* Settings */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: white; padding: 10px; border-radius: 8px; }
+        .setting-row label { font-size: 13px; font-weight: bold; }
+        .setting-row input { max-width: 100px; text-align: right; border-bottom: 2px solid var(--primary); border-top:0; border-left:0; border-right:0; border-radius: 0; }
     </style>
 </head>
 <body>
@@ -65,8 +70,7 @@
 <header>
     <img src="https://cdn-icons-png.flaticon.com/512/6947/6947616.png" alt="Logo">
     <div class="header-info">
-        <h3>QUẢNG TRỊ SHIPPER</h3>
-        <small id="gps-status">Đang định vị...</small>
+        <h3>SHIPPER QUẢNG TRỊ</h3>
     </div>
 </header>
 
@@ -74,45 +78,50 @@
     <div id="page-home" class="page active">
         <div class="stats-container">
             <div class="stat-card"><span>HÔM NAY</span><b id="stat-day">0đ</b></div>
-            <div class="stat-card" style="border-top-color: var(--secondary);"><span>TUẦN</span><b id="stat-week">0đ</b></div>
+            <div class="stat-card" style="border-top-color: var(--secondary);"><span>TUẦN NÀY</span><b id="stat-week">0đ</b></div>
             <div class="stat-card" style="border-top-color: #9b59b6;"><span>THÁNG</span><b id="stat-month">0đ</b></div>
         </div>
 
         <div class="card">
             <div class="search-box">
-                <input type="text" id="destAddress" placeholder="Địa chỉ giao hàng...">
+                <input type="text" id="destAddress" placeholder="Nhập địa chỉ giao...">
                 <button class="btn btn-search" onclick="findAddress()">TÌM</button>
             </div>
-
             <div id="map"></div>
-
             <div class="result-panel">
-                <div class="calc-row"><span>Khoảng cách:</span><span id="out-dist">0.00</span> km</div>
-                <div class="calc-row"><span>Phí ship:</span><span id="out-fare">0đ</span></div>
-                <div class="calc-row"><span>Tiền COD:</span><span><input type="number" id="codAmount" oninput="updateTotal()" placeholder="0" style="width: 80px; padding: 2px; border: 1px solid #ccc; text-align: right; border-radius: 4px;"> đ</span></div>
+                <div class="calc-row"><span>Khoảng cách:</span><span><b id="out-dist">0.00</b> km</span></div>
+                <div class="calc-row"><span>Phí ship:</span><b id="out-fare">0đ</b></div>
+                <div class="calc-row"><span>Tiền COD:</span><span><input type="number" id="codAmount" oninput="updateTotal()" placeholder="0" style="width: 80px; text-align: right;"> đ</span></div>
                 <div class="calc-total"><span>TỔNG THU:</span><span id="out-total">0đ</span></div>
             </div>
-
             <div id="nav-btn-box" style="display: none;">
-                <a id="googleNavBtn" href="#" target="_blank" class="btn btn-nav">🚀 CHỈ ĐƯỜNG (GOOGLE MAPS)</a>
+                <a id="googleNavBtn" href="#" target="_blank" class="btn btn-nav">🚀 CHỈ ĐƯỜNG</a>
             </div>
-
-            <button class="btn btn-primary" onclick="handleSave()">GIAO XONG & LƯU ĐƠN</button>
+            <button class="btn btn-primary" onclick="handleSave()">HOÀN THÀNH & LƯU ĐƠN</button>
         </div>
     </div>
 
     <div id="page-history" class="page">
-        <div style="display: flex; justify-content: space-between; padding: 10px;">
-            <b>LỊCH SỬ</b>
-            <span onclick="clearHistory()" style="color:red; font-size:12px;">XÓA HẾT</span>
+        <div style="display: flex; justify-content: space-between; padding: 10px; align-items: center;">
+            <b style="font-size: 14px;">LỊCH SỬ ĐƠN</b>
+            <span onclick="clearHistory()" style="color:red; font-size:11px; font-weight:bold;">XÓA HẾT</span>
         </div>
         <div id="history-list"></div>
+    </div>
+
+    <div id="page-settings" class="page">
+        <b style="display:block; margin-bottom:15px; font-size:14px;">CÀI ĐẶT BẢNG GIÁ</b>
+        <div class="setting-row"><label>Giá 2km đầu:</label><input type="number" id="price_2km" onchange="saveSettings()"></div>
+        <div class="setting-row"><label>Giá km thứ 3:</label><input type="number" id="price_3km" onchange="saveSettings()"></div>
+        <div class="setting-row"><label>Giá mỗi km sau đó:</label><input type="number" id="price_next" onchange="saveSettings()"></div>
+        <p style="font-size: 11px; color: #777; padding: 10px;">* Hệ thống sẽ tự động tính: Dưới 2km lấy giá mốc 1. Từ 2-3km lấy giá mốc 2. Trên 3km cộng thêm giá mốc 3 cho mỗi km lẻ.</p>
     </div>
 </div>
 
 <div class="nav">
     <div class="nav-item active" onclick="showPage('home')">🏠<br>Tạo đơn</div>
     <div class="nav-item" onclick="showPage('history')">📜<br>Lịch sử</div>
+    <div class="nav-item" onclick="showPage('settings')">⚙️<br>Cài đặt</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -121,12 +130,26 @@
 <script>
     var map = L.map('map', { zoomControl: false }).setView([16.8173, 107.0988], 14);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    var startPt = null, routingControl = null, currentFare = 0;
 
-    var startPt = null, endPt = null, routingControl = null, currentFare = 0;
+    // Load Cài đặt
+    var settings = JSON.parse(localStorage.getItem('shipper_settings')) || { p2: 15000, p3: 20000, pn: 10000 };
+    document.getElementById('price_2km').value = settings.p2;
+    document.getElementById('price_3km').value = settings.p3;
+    document.getElementById('price_next').value = settings.pn;
 
+    function saveSettings() {
+        settings = {
+            p2: parseInt(document.getElementById('price_2km').value),
+            p3: parseInt(document.getElementById('price_3km').value),
+            pn: parseInt(document.getElementById('price_next').value)
+        };
+        localStorage.setItem('shipper_settings', JSON.stringify(settings));
+    }
+
+    // Định vị
     navigator.geolocation.getCurrentPosition(pos => {
         startPt = L.latLng(pos.coords.latitude, pos.coords.longitude);
-        document.getElementById('gps-status').innerText = "Vị trí: OK ✅";
         map.setView(startPt, 15);
         L.circleMarker(startPt, {radius: 6, color: '#fff', fillColor: '#0984e3', fillOpacity: 1}).addTo(map);
     }, null, {enableHighAccuracy: true});
@@ -139,79 +162,94 @@
         try {
             let resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input + ', Quảng Trị')}&limit=1`);
             let data = await resp.json();
-            if(data[0]) {
-                let dest = L.latLng(data[0].lat, data[0].lon);
-                calculateRoute(dest);
-                map.setView(dest, 16);
-            }
+            if(data[0]) calculateRoute(L.latLng(data[0].lat, data[0].lon));
         } catch(e) {}
     }
 
     function calculateRoute(destLatLng) {
-        if (!startPt) return alert("Chưa có GPS!");
+        if (!startPt) return;
         if (routingControl) map.removeControl(routingControl);
-        endPt = destLatLng;
-        routingControl = L.Routing.control({
-            waypoints: [startPt, endPt],
-            createMarker: () => null
-        }).addTo(map);
-
+        routingControl = L.Routing.control({ waypoints: [startPt, destLatLng], createMarker: () => null }).addTo(map);
         routingControl.on('routesfound', e => {
             let d = e.routes[0].summary.totalDistance / 1000;
             document.getElementById('out-dist').innerText = d.toFixed(2);
-            currentFare = d <= 2 ? 15000 : (d <= 3 ? 20000 : 15000 + (Math.ceil(d - 2) * 10000));
+            // Logic tính tiền theo cài đặt
+            if (d <= 2) currentFare = settings.p2;
+            else if (d <= 3) currentFare = settings.p3;
+            else currentFare = settings.p2 + (Math.ceil(d - 2) * settings.pn);
+            
             document.getElementById('out-fare').innerText = currentFare.toLocaleString() + "đ";
             updateTotal();
             document.getElementById('nav-btn-box').style.display = 'block';
-            document.getElementById('googleNavBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${endPt.lat},${endPt.lng}&travelmode=motorcycle`;
+            document.getElementById('googleNavBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${destLatLng.lat},${destLatLng.lng}&travelmode=motorcycle`;
         });
     }
 
     function updateTotal() {
         let cod = parseInt(document.getElementById('codAmount').value) || 0;
-        let total = currentFare + cod;
-        document.getElementById('out-total').innerText = total.toLocaleString() + "đ";
+        document.getElementById('out-total').innerText = (currentFare + cod).toLocaleString() + "đ";
     }
 
     function handleSave() {
-        if(!currentFare) return alert("Chưa có phí ship!");
-        let cod = parseInt(document.getElementById('codAmount').value) || 0;
-        let order = {
-            id: Date.now(),
-            ship: currentFare,
-            cod: cod,
-            total: currentFare + cod,
+        if(!currentFare) return alert("Vui lòng chọn điểm giao!");
+        let history = JSON.parse(localStorage.getItem('shipper_qt_final') || '[]');
+        history.unshift({
+            id: Date.now(), ship: currentFare, cod: (parseInt(document.getElementById('codAmount').value) || 0),
             address: document.getElementById('destAddress').value || "Ghim bản đồ",
-            date: new Date().toLocaleString('vi-VN')
-        };
-        let history = JSON.parse(localStorage.getItem('shipper_qt_v4') || '[]');
-        history.unshift(order);
-        localStorage.setItem('shipper_qt_v4', JSON.stringify(history));
-        alert("Đã lưu đơn!");
-        updateStats();
-        resetForm();
+            date: new Date().toISOString()
+        });
+        localStorage.setItem('shipper_qt_final', JSON.stringify(history));
+        alert("Đã lưu!");
+        updateStats(); resetForm();
+    }
+
+    function deleteOrder(id) {
+        if(confirm("Xóa đơn này?")) {
+            let history = JSON.parse(localStorage.getItem('shipper_qt_final') || '[]');
+            history = history.filter(item => item.id !== id);
+            localStorage.setItem('shipper_qt_final', JSON.stringify(history));
+            updateHistory(); updateStats();
+        }
     }
 
     function updateStats() {
-        let history = JSON.parse(localStorage.getItem('shipper_qt_v4') || '[]');
-        let totalShip = history.reduce((a, b) => a + b.ship, 0); // Chỉ thống kê doanh thu ship
-        document.getElementById('stat-day').innerText = totalShip.toLocaleString() + "đ";
-        // (Bạn có thể thêm logic lọc theo ngày/tuần tương tự các bản trước ở đây)
+        let history = JSON.parse(localStorage.getItem('shipper_qt_final') || '[]');
+        let now = new Date();
+        let d = 0, w = 0, m = 0;
+        
+        // Tính Thứ 2 tuần này
+        let startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+        startOfWeek.setHours(0,0,0,0);
+
+        history.forEach(item => {
+            let iDate = new Date(item.date);
+            if(iDate.toDateString() === now.toDateString()) d += item.ship;
+            if(iDate >= startOfWeek) w += item.ship;
+            if(iDate.getMonth() === now.getMonth() && iDate.getFullYear() === now.getFullYear()) m += item.ship;
+        });
+
+        document.getElementById('stat-day').innerText = d.toLocaleString() + "đ";
+        document.getElementById('stat-week').innerText = w.toLocaleString() + "đ";
+        document.getElementById('stat-month').innerText = m.toLocaleString() + "đ";
     }
 
     function updateHistory() {
-        let history = JSON.parse(localStorage.getItem('shipper_qt_v4') || '[]');
+        let history = JSON.parse(localStorage.getItem('shipper_qt_final') || '[]');
         document.getElementById('history-list').innerHTML = history.map(item => `
             <div class="history-item">
-                <div class="history-top"><span>${item.address}</span><span style="color:red;">${item.total.toLocaleString()}đ</span></div>
-                <div class="history-sub"><span>Ship: ${item.ship.toLocaleString()} | COD: ${item.cod.toLocaleString()}</span><span>${item.date}</span></div>
+                <span class="btn-delete-item" onclick="deleteOrder(${item.id})">×</span>
+                <div class="history-top"><span>${item.address}</span><span style="color:var(--danger)">${(item.ship+item.cod).toLocaleString()}đ</span></div>
+                <div style="font-size:11px; color:#666;">Ship: ${item.ship.toLocaleString()} | COD: ${item.cod.toLocaleString()}</div>
+                <div style="font-size:10px; color:#999; margin-top:4px;">${new Date(item.date).toLocaleString('vi-VN')}</div>
             </div>
         `).join('');
     }
 
     function showPage(p) {
-        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.page, .nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('page-'+p).classList.add('active');
+        event.currentTarget.classList.add('active');
         if(p === 'history') updateHistory();
     }
 
@@ -222,6 +260,8 @@
         document.getElementById('out-total').innerText = "0đ";
         currentFare = 0;
     }
+    
+    function clearHistory() { if(confirm("Xóa tất cả dữ liệu?")) { localStorage.removeItem('shipper_qt_final'); location.reload(); } }
     window.onload = updateStats;
 </script>
 </body>
