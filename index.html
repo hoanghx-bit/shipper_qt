@@ -35,24 +35,52 @@
         .page.active { display: block; }
 
         /* Dashboard thống kê */
-        .stats-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .stat-card { 
+      .stats-container { 
+    display: flex; /* Dùng flex thay vì grid để các ô linh hoạt hơn */
+    gap: 5px; 
+    margin-bottom: 15px; 
+    width: 100%;
+}
+
+.stat-card { 
+    flex: 1; /* Chia đều 3 cột bằng nhau */
     background: white; 
-    padding: 10px 2px; /* Giảm padding hai bên */
+    padding: 8px 2px; 
     border-radius: 12px; 
     text-align: center; 
     box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-    border-top: 4px solid var(--primary); 
-    min-width: 0; /* Cho phép co giãn */
-    overflow: hidden; /* Tránh tràn khung */
+    border-top: 4px solid var(--primary);
+    min-width: 0; /* Quan trọng: Cho phép ô co lại nhỏ hơn nội dung */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stat-card span { 
+    font-size: 9px; 
+    color: #636e72; 
+    font-weight: bold; 
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
 }
 
 .stat-card b { 
     display: block; 
-    font-size: 11px; /* Giảm cỡ chữ từ 13px xuống 11px để hiện đủ số tiền lớn */
-    margin-top: 4px; 
+    /* Giải pháp vàng: Dùng đơn vị vw (viết tắt của view-width) 
+       để cỡ chữ tự co giãn theo chiều rộng màn hình điện thoại */
+    font-size: 3.2vw; 
     color: var(--dark);
-    white-space: nowrap; /* Không cho xuống dòng */
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis; /* Nếu vẫn quá dài sẽ hiện dấu ... thay vì đè lên nhau */
+}
+
+/* Đối với màn hình máy tính lớn hơn, giới hạn cỡ chữ không cho nó quá to */
+@media (min-width: 600px) {
+    .stat-card b {
+        font-size: 14px;
+    }
 }
 
         /* Khung bản đồ và nhập liệu */
