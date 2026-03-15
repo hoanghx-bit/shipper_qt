@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shipper Quảng Trị v9.4 Pro</title>
+    <title>Shipper Quảng Trị Pro v9.6</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
@@ -58,50 +58,47 @@
         .btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; text-align: center; color: white; text-decoration: none; }
         
         .btn-start { background: var(--secondary); }
-        .btn-done { background: var(--primary); display: none; }
-        .btn-cancel { background: #b2bec3; display: none; flex: 0.3; }
+        .btn-done { background: var(--primary); }
+        .btn-cancel { background: #b2bec3; flex: 0.3; }
         .btn-save-quote { background: var(--purple); }
         .btn-nav { background: #ff9f43; }
 
-        /* Menu Sidebar */
+        /* Sidebar & Pages */
         .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 3000; transition: 0.3s; padding-top: 60px; box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
         .sidebar.open { left: 0; }
         .menu-item { padding: 18px 25px; border-bottom: 1px solid #f9f9f9; cursor: pointer; font-size: 15px; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2500; display: none; }
-        
-        /* Pages */
         .page { display: none; height: 100%; overflow-y: auto; background: var(--bg); position: absolute; top: 55px; width: 100%; z-index: 2001; padding-bottom: 100px; }
         .page.active { display: block; }
-        
-        /* List Items */
-        .item-card { background: white; padding: 15px; margin: 10px; border-radius: 15px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .btn-delete-small { position: absolute; top: 10px; right: 10px; color: #ccc; border: none; background: none; font-size: 18px; cursor: pointer; }
 
-        /* Công nợ Form */
+        /* Stats & Cards */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 15px; background: white; }
+        .stat-card { text-align: center; padding: 10px 5px; background: #f8f9fa; border-radius: 10px; border: 1px solid #eee; }
+        .item-card { background: white; padding: 15px; margin: 10px; border-radius: 15px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn-delete-small { position: absolute; top: 10px; right: 10px; color: #ccc; border: none; background: none; font-size: 18px; }
         .debt-form { background: white; padding: 15px; margin: 10px; border-radius: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .debt-form input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
     </style>
 </head>
 <body>
 
 <header>
     <div style="cursor:pointer; font-size: 22px; margin-right: 15px;" onclick="toggleMenu()">☰</div>
-    <h3 style="font-size: 13px; margin: 0;">SHIPPER QUẢNG TRỊ v9.4</h3>
+    <h3 style="font-size: 13px; margin: 0;">SHIPPER QUẢNG TRỊ v9.6</h3>
 </header>
 
 <div class="sidebar" id="sidebar">
     <div class="menu-item" onclick="showPage('home')">🏠 Bản đồ & Ghi đơn</div>
-    <div class="menu-item" onclick="showPage('history')">📜 Lịch sử giao hàng</div>
+    <div class="menu-item" onclick="showPage('history')">📜 Lịch sử & Doanh thu</div>
     <div class="menu-item" onclick="showPage('debt')">💸 Quản lý Công nợ</div>
-    <div class="menu-item" onclick="showPage('settings')">⚙️ Cài đặt bảng giá</div>
+    <div class="menu-item" onclick="showPage('settings')">⚙️ Bảng giá</div>
 </div>
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <div class="container">
     <div id="page-home" style="height: 100%; position: relative;">
         <div class="search-area">
-            <div class="input-group"><input type="text" id="startAddr" placeholder="📍 Điểm lấy hàng..."><button class="btn-find" onclick="findAddress('start')">TÌM</button></div>
-            <div class="input-group"><input type="text" id="destAddr" placeholder="🏁 Điểm giao khách..."><button class="btn-find" onclick="findAddress('dest')">TÌM</button></div>
+            <div class="input-group"><input type="text" id="startAddr" placeholder="📍 Điểm lấy..."><button class="btn-find" onclick="findAddress('start')">TÌM</button></div>
+            <div class="input-group"><input type="text" id="destAddr" placeholder="🏁 Điểm giao..."><button class="btn-find" onclick="findAddress('dest')">TÌM</button></div>
         </div>
         <div id="statusBadge" class="status-badge status-waiting">SẴN SÀNG</div>
         <div id="map"></div>
@@ -112,46 +109,39 @@
                 <div class="info-item"><span>Tổng thu</span><b id="out-total" style="color:var(--danger)">0đ</b></div>
             </div>
             <div class="cod-input-wrap"><span>COD:</span><input type="number" id="codAmount" placeholder="0" oninput="updateTotal()"><b>đ</b></div>
+            
             <div class="btn-group">
-                <div class="row-btns">
-                    <button id="btnStart" class="btn btn-start" onclick="startOrder()">📍 NHẬN ĐƠN</button>
-                    <button id="btnCancel" class="btn btn-cancel" onclick="cancelOrder()">HỦY</button>
-                    <button id="btnDone" class="btn btn-done" onclick="completeOrder()">✅ GIAO XONG</button>
+                <div id="real-group" class="row-btns">
+                    <button id="btnStart" class="btn btn-start" onclick="startOrder()">📍 NHẬN ĐƠN (GPS)</button>
+                    <button id="btnCancel" class="btn btn-cancel" onclick="cancelOrder()" style="display:none">HỦY</button>
+                    <button id="btnDone" class="btn btn-done" onclick="completeOrder()" style="display:none">✅ GIAO XONG (THỰC TẾ)</button>
                 </div>
-                <div class="row-btns">
-                    <a id="navBtn" href="#" target="_blank" class="btn btn-nav" style="display:none">DẪN ĐƯỜNG</a>
-                    <button id="btnSaveQuote" class="btn btn-save-quote" onclick="saveQuote()" style="display:none">LƯU BÁO GIÁ</button>
+                <div id="quote-group" class="row-btns" style="display:none">
+                    <button class="btn btn-done" onclick="completeFromQuote()">✅ ĐÃ GIAO (THEO GIÁ NÀY)</button>
+                    <a id="navBtn" href="#" target="_blank" class="btn btn-nav">DẪN ĐƯỜNG</a>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="page-history" class="page">
+        <div class="stats-grid"><div class="stat-card"><span>HÔM NAY</span><b id="stat-day">0đ</b></div><div class="stat-card"><span>TUẦN</span><b id="stat-week">0đ</b></div><div class="stat-card"><span>THÁNG</span><b id="stat-month">0đ</b></div></div>
         <div id="history-list"></div>
-        <center><button onclick="clearAllHistory()" style="color:red; background:none; border:none; padding:20px; font-size:12px;">XÓA TẤT CẢ LỊCH SỬ</button></center>
+        <center><button onclick="clearAllHistory()" style="color:red; background:none; border:none; padding:20px; font-size:12px;">XÓA TẤT CẢ</button></center>
     </div>
 
     <div id="page-debt" class="page">
         <div class="debt-form">
-            <b style="color:var(--purple)">Ghi chú nợ mới:</b>
-            <input type="text" id="debtName" placeholder="Tên khách hàng/Shop">
-            <input type="number" id="debtMoney" placeholder="Số tiền nợ">
-            <input type="text" id="debtNote" placeholder="Ghi chú (Ví dụ: Nợ ship đơn Đông Hà)">
-            <button class="btn btn-save-quote" onclick="addDebt()">+ LƯU CÔNG NỢ</button>
+            <b>Ghi nợ:</b>
+            <input type="text" id="debtName" placeholder="Khách/Shop"><input type="number" id="debtMoney" placeholder="Số tiền"><input type="text" id="debtNote" placeholder="Ghi chú">
+            <button class="btn btn-save-quote" onclick="addDebt()">LƯU NỢ</button>
         </div>
         <div id="debt-list"></div>
     </div>
 
     <div id="page-settings" class="page">
-        <div style="padding: 20px;">
-            <h4>BẢNG GIÁ CƯỚC</h4>
-            <div id="rules-container"></div>
-            <button onclick="addNewRule()" style="width:100%; padding:10px; border:2px dashed #ccc; background:none; border-radius:10px; margin:10px 0;">+ Thêm mốc</button>
-            <div style="background:white; padding:15px; border-radius:10px; margin-bottom:15px;">
-                <label style="font-size:12px;">Giá mỗi KM phát sinh:</label>
-                <input type="number" id="price_next_km" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ddd; border-radius:8px;">
-            </div>
-            <button class="btn btn-start" style="width:100%;" onclick="saveAllSettings()">LƯU CÀI ĐẶT</button>
+        <div style="padding: 20px;"><h4>BẢNG GIÁ</h4><div id="rules-container"></div><button onclick="addNewRule()" style="width:100%; padding:10px; border:2px dashed #ccc; background:none; margin:10px 0;">+ Thêm mốc</button>
+            <input type="number" id="price_next_km" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;"><button class="btn btn-start" style="width:100%; margin-top:10px;" onclick="saveAllSettings()">LƯU</button>
         </div>
     </div>
 </div>
@@ -167,18 +157,18 @@
     var priceRules = JSON.parse(localStorage.getItem('sqt_rules')) || [{km: 2, price: 15000}, {km: 3, price: 20000}];
     var nextKmPrice = parseInt(localStorage.getItem('sqt_next_price')) || 10000;
 
+    // GPS chính xác cao
     var myMarker = L.circleMarker([0,0], {radius: 8, color: '#fff', fillColor: '#0984e3', fillOpacity: 1, weight: 3}).addTo(map);
-
     function updateLocation() {
         navigator.geolocation.getCurrentPosition(pos => {
             const p = [pos.coords.latitude, pos.coords.longitude];
             myMarker.setLatLng(p);
             if (!isShipping && !destCoords) map.panTo(p);
-        }, null, {enableHighAccuracy: true});
+        }, null, {enableHighAccuracy: true, timeout: 5000});
     }
-    setInterval(updateLocation, 5000);
+    setInterval(updateLocation, 4000);
 
-    // --- LOGIC BẢN ĐỒ & TÍNH TIỀN ---
+    // BÁO GIÁ & TÌM KIẾM
     async function findAddress(type) {
         let input = document.getElementById(type === 'start' ? 'startAddr' : 'destAddr').value;
         if(!input) return;
@@ -200,46 +190,57 @@
             navigator.geolocation.getCurrentPosition(pos => {
                 startCoords = L.latLng(pos.coords.latitude, pos.coords.longitude);
                 calculateQuote();
-            });
+            }, null, {enableHighAccuracy: true});
         } else { calculateQuote(); }
     });
 
     function calculateQuote() {
         if(!startCoords || !destCoords) return;
         if(routingControl) map.removeControl(routingControl);
-        routingControl = L.Routing.control({ waypoints: [startCoords, destCoords], createMarker: () => null, lineOptions: { styles: [{ color: '#6c5ce7', weight: 5 }] } }).addTo(map);
+        routingControl = L.Routing.control({ waypoints: [startCoords, destCoords], createMarker: () => null, lineOptions: { styles: [{ color: '#6c5ce7', weight: 6, opacity: 0.8 }] } }).addTo(map);
         routingControl.on('routesfound', e => {
             const d = e.routes[0].summary.totalDistance / 1000;
             updateDisplay(d);
-            document.getElementById('btnSaveQuote').style.display = 'block';
-            document.getElementById('navBtn').style.display = 'block';
+            document.getElementById('quote-group').style.display = 'flex';
             document.getElementById('navBtn').href = `https://www.google.com/maps/dir/?api=1&origin=${startCoords.lat},${startCoords.lng}&destination=${destCoords.lat},${destCoords.lng}&travelmode=motorcycle`;
         });
     }
 
+    // --- CHỨC NĂNG MỚI: XÁC NHẬN ĐÃ GIAO TỪ BÁO GIÁ ---
+    function completeFromQuote() {
+        const d = parseFloat(document.getElementById('out-dist').innerText);
+        const addr = document.getElementById('destAddr').value || "Điểm trên bản đồ";
+        saveData(d, "Giao theo báo giá: " + addr);
+        alert("Đã hoàn thành và cộng doanh thu!");
+        resetUI();
+    }
+
+    // GHI ĐƠN THỰC TẾ
     function startOrder() {
         navigator.geolocation.getCurrentPosition(pos => {
             startCoords = L.latLng(pos.coords.latitude, pos.coords.longitude);
-            isShipping = true; destCoords = null; if(routingControl) map.removeControl(routingControl);
+            isShipping = true; destCoords = null; 
+            if(routingControl) map.removeControl(routingControl);
             document.getElementById('btnStart').style.display = 'none';
             document.getElementById('btnDone').style.display = 'block';
             document.getElementById('btnCancel').style.display = 'block';
-            document.getElementById('btnSaveQuote').style.display = 'none';
-            document.getElementById('statusBadge').innerText = "ĐANG GIAO THỰC TẾ...";
+            document.getElementById('quote-group').style.display = 'none';
+            document.getElementById('statusBadge').innerText = "ĐANG GIAO (GPS)...";
             document.getElementById('statusBadge').className = "status-badge status-shipping";
-            L.marker(startCoords).addTo(map).bindPopup("Điểm lấy hàng").openPopup();
-        });
+            L.marker(startCoords).addTo(map).bindPopup("Bắt đầu tại đây").openPopup();
+        }, null, {enableHighAccuracy: true});
     }
 
     function completeOrder() {
         navigator.geolocation.getCurrentPosition(pos => {
             const end = L.latLng(pos.coords.latitude, pos.coords.longitude);
             const d = calcDist(startCoords.lat, startCoords.lng, end.lat, end.lng);
-            saveData(d, "Đơn thực tế");
-            alert("Đã xong!"); resetUI();
-        });
+            saveData(d, "Giao thực tế (GPS)");
+            alert("Đã lưu doanh thu thực tế!"); resetUI();
+        }, null, {enableHighAccuracy: true});
     }
 
+    // LOGIC TÍNH TOÁN & LƯU TRỮ (GIỮ NGUYÊN)
     function updateDisplay(d) {
         document.getElementById('out-dist').innerText = d.toFixed(2);
         let sorted = [...priceRules].sort((a,b) => a.km - b.km);
@@ -250,107 +251,69 @@
     }
 
     function calcDist(lat1, lon1, lat2, lon2) {
-        const R = 6371; const dLat = (lat2-lat1) * Math.PI/180; const dLon = (lon2-lon1) * Math.PI/180;
-        const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+        const R = 6371; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
         return (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * R * 1.25;
     }
 
-    // --- LỊCH SỬ ---
     function saveData(d, note) {
-        let h = JSON.parse(localStorage.getItem('sqt_v94_hist')) || [];
+        let h = JSON.parse(localStorage.getItem('sqt_v96_hist')) || [];
         const cod = parseInt(document.getElementById('codAmount').value) || 0;
-        h.unshift({ id: Date.now(), date: new Date().toLocaleString('vi-VN'), dist: d.toFixed(2), fare: currentFare, cod: cod, note: note });
-        localStorage.setItem('sqt_v94_hist', JSON.stringify(h));
+        h.unshift({ id: Date.now(), timestamp: Date.now(), dateStr: new Date().toLocaleString('vi-VN'), dist: d.toFixed(2), fare: currentFare, cod: cod, note: note });
+        localStorage.setItem('sqt_v96_hist', JSON.stringify(h));
     }
 
-    function renderHistory() {
-        let h = JSON.parse(localStorage.getItem('sqt_v94_hist')) || [];
-        document.getElementById('history-list').innerHTML = h.map(i => `
-            <div class="item-card">
-                <button class="btn-delete-small" onclick="deleteHistoryItem(${i.id})">×</button>
-                <div style="font-size:10px; color:#999;">${i.date}</div>
-                <div style="font-weight:bold; font-size:13px; margin:3px 0;">${i.note}</div>
-                <div style="font-size:14px;">Ship: <b>${i.fare.toLocaleString()}đ</b> - ${i.dist}km</div>
-                <div style="font-size:12px; color:var(--danger);">Thu hộ: ${i.cod.toLocaleString()}đ</div>
-            </div>`).join('');
-    }
-
-    function deleteHistoryItem(id) { if(confirm("Xóa đơn này?")) { let h = JSON.parse(localStorage.getItem('sqt_v94_hist')).filter(x => x.id !== id); localStorage.setItem('sqt_v94_hist', JSON.stringify(h)); renderHistory(); } }
-    function clearAllHistory() { if(confirm("Xóa sạch lịch sử?")) { localStorage.removeItem('sqt_v94_hist'); renderHistory(); } }
-
-    // --- CÔNG NỢ ---
-    function addDebt() {
-        const name = document.getElementById('debtName').value;
-        const money = document.getElementById('debtMoney').value;
-        const note = document.getElementById('debtNote').value;
-        if(!name || !money) return alert("Vui lòng nhập tên và số tiền");
-        let d = JSON.parse(localStorage.getItem('sqt_v94_debt')) || [];
-        d.unshift({ id: Date.now(), name, money: parseInt(money), note, date: new Date().toLocaleDateString('vi-VN'), paid: false });
-        localStorage.setItem('sqt_v94_debt', JSON.stringify(d));
-        document.getElementById('debtName').value = ''; document.getElementById('debtMoney').value = ''; document.getElementById('debtNote').value = '';
-        renderDebt();
-    }
-
-    function renderDebt() {
-        let d = JSON.parse(localStorage.getItem('sqt_v94_debt')) || [];
-        document.getElementById('debt-list').innerHTML = d.map(i => `
-            <div class="item-card" style="border-left: 5px solid ${i.paid ? '#00b894' : '#fdbe19'}">
-                <button class="btn-delete-small" onclick="deleteDebt(${i.id})">×</button>
-                <div style="font-size:11px; color:#999;">Ngày: ${i.date}</div>
-                <div style="font-weight:bold; color:var(--dark);">${i.name}</div>
-                <div style="color:var(--danger); font-weight:bold; font-size:16px;">${i.money.toLocaleString()}đ</div>
-                <div style="font-size:12px; color:#666;">${i.note}</div>
-                <button onclick="togglePaid(${i.id})" style="margin-top:10px; padding:5px 10px; border:none; border-radius:5px; background:${i.paid ? '#eee' : '#55efc4'}; font-size:11px; font-weight:bold;">
-                    ${i.paid ? 'Đã thanh toán' : 'Chưa thanh toán (Bấm để trả)'}
-                </button>
-            </div>`).join('');
-    }
-
-    function togglePaid(id) {
-        let d = JSON.parse(localStorage.getItem('sqt_v94_debt'));
-        let idx = d.findIndex(x => x.id === id);
-        d[idx].paid = !d[idx].paid;
-        localStorage.setItem('sqt_v94_debt', JSON.stringify(d));
-        renderDebt();
-    }
-
-    function deleteDebt(id) { if(confirm("Xóa mục nợ này?")) { let d = JSON.parse(localStorage.getItem('sqt_v94_debt')).filter(x => x.id !== id); localStorage.setItem('sqt_v94_debt', JSON.stringify(d)); renderDebt(); } }
-
-    // --- CÀI ĐẶT & UI ---
     function resetUI() {
         isShipping = false; startCoords = null; destCoords = null; currentFare = 0;
         if(routingControl) map.removeControl(routingControl);
         document.getElementById('btnStart').style.display = 'block';
         document.getElementById('btnDone').style.display = 'none';
         document.getElementById('btnCancel').style.display = 'none';
-        document.getElementById('btnSaveQuote').style.display = 'none';
-        document.getElementById('navBtn').style.display = 'none';
+        document.getElementById('quote-group').style.display = 'none';
         document.getElementById('statusBadge').innerText = "SẴN SÀNG";
         document.getElementById('statusBadge').className = "status-badge status-waiting";
         document.getElementById('out-dist').innerText = "0.0"; document.getElementById('out-fare').innerText = "0đ"; document.getElementById('out-total').innerText = "0đ";
+        document.getElementById('startAddr').value = ""; document.getElementById('destAddr').value = ""; document.getElementById('codAmount').value = "";
     }
 
-    function saveQuote() { const d = parseFloat(document.getElementById('out-dist').innerText); saveData(d, "Báo giá: " + document.getElementById('destAddr').value); alert("Đã lưu!"); resetUI(); }
+    // THỐNG KÊ & PHỤ TRỢ (GIỮ NGUYÊN)
+    function renderHistory() {
+        let h = JSON.parse(localStorage.getItem('sqt_v96_hist')) || [];
+        let now = new Date(); let dTotal=0, wTotal=0, mTotal=0;
+        h.forEach(i => {
+            let id = new Date(i.timestamp);
+            if(id.toDateString()===now.toDateString()) dTotal+=i.fare;
+            if(id.getMonth()===now.getMonth() && id.getFullYear()===now.getFullYear()) mTotal+=i.fare;
+            if((now-id)/(864e5)<=7) wTotal+=i.fare;
+        });
+        document.getElementById('stat-day').innerText = dTotal.toLocaleString()+"đ";
+        document.getElementById('stat-week').innerText = wTotal.toLocaleString()+"đ";
+        document.getElementById('stat-month').innerText = mTotal.toLocaleString()+"đ";
+        document.getElementById('history-list').innerHTML = h.map(i => `<div class="item-card"><button class="btn-delete-small" onclick="deleteHistoryItem(${i.id})">×</button><div style="font-size:10px; color:#999;">${i.dateStr}</div><div style="font-weight:bold; font-size:13px;">${i.note}</div><div>Ship: <b>${i.fare.toLocaleString()}đ</b> - ${i.dist}km</div></div>`).join('');
+    }
+
+    function deleteHistoryItem(id) { if(confirm("Xóa?")) { let h = JSON.parse(localStorage.getItem('sqt_v96_hist')).filter(x => x.id !== id); localStorage.setItem('sqt_v96_hist', JSON.stringify(h)); renderHistory(); } }
+    function clearAllHistory() { if(confirm("Xóa sạch?")) { localStorage.removeItem('sqt_v96_hist'); renderHistory(); } }
+    function addDebt() {
+        const name = document.getElementById('debtName').value, money = document.getElementById('debtMoney').value, note = document.getElementById('debtNote').value;
+        if(!name || !money) return;
+        let d = JSON.parse(localStorage.getItem('sqt_v96_debt')) || [];
+        d.unshift({ id: Date.now(), name, money: parseInt(money), note, date: new Date().toLocaleDateString('vi-VN'), paid: false });
+        localStorage.setItem('sqt_v96_debt', JSON.stringify(d));
+        renderDebt();
+    }
+    function renderDebt() {
+        let d = JSON.parse(localStorage.getItem('sqt_v96_debt')) || [];
+        document.getElementById('debt-list').innerHTML = d.map(i => `<div class="item-card" style="border-left:5px solid ${i.paid?'#00b894':'#fdbe19'}"><button class="btn-delete-small" onclick="deleteDebt(${i.id})">×</button><div><b>${i.name}</b></div><div style="color:var(--danger); font-weight:bold;">${i.money.toLocaleString()}đ</div><button onclick="togglePaid(${i.id})" style="margin-top:5px; font-size:11px;">${i.paid?'Đã trả':'Chưa trả'}</button></div>`).join('');
+    }
+    function togglePaid(id) { let d = JSON.parse(localStorage.getItem('sqt_v96_debt')); let idx = d.findIndex(x=>x.id===id); d[idx].paid = !d[idx].paid; localStorage.setItem('sqt_v96_debt', JSON.stringify(d)); renderDebt(); }
+    function deleteDebt(id) { if(confirm("Xóa?")) { let d = JSON.parse(localStorage.getItem('sqt_v96_debt')).filter(x=>x.id!==id); localStorage.setItem('sqt_v96_debt', JSON.stringify(d)); renderDebt(); } }
     function updateTotal() { const cod = parseInt(document.getElementById('codAmount').value) || 0; document.getElementById('out-total').innerText = (currentFare + cod).toLocaleString() + "đ"; }
     function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').style.display = document.getElementById('sidebar').classList.contains('open') ? 'block' : 'none'; }
-    function showPage(p) { 
-        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-        if(p !== 'home') document.getElementById('page-'+p).classList.add('active');
-        if(p === 'history') renderHistory(); if(p === 'debt') renderDebt(); if(p === 'settings') renderRules();
-        toggleMenu(); 
-    }
-    function renderRules() {
-        const container = document.getElementById('rules-container');
-        container.innerHTML = priceRules.map((rule, index) => `
-            <div style="display:flex; align-items:center; gap:5px; margin-bottom:8px; background:white; padding:8px; border-radius:8px;">
-                <span style="font-size:11px">Dưới</span><input type="number" value="${rule.km}" onchange="priceRules[${index}].km=parseFloat(this.value)" style="width:40px;">
-                <span style="font-size:11px">km =</span><input type="number" value="${rule.price}" onchange="priceRules[${index}].price=parseInt(this.value)" style="width:70px;">
-                <span onclick="priceRules.splice(${index},1);renderRules()" style="color:red; margin-left:auto; font-weight:bold;">×</span>
-            </div>`).join('');
-        document.getElementById('price_next_km').value = nextKmPrice;
-    }
+    function showPage(p) { document.querySelectorAll('.page').forEach(el => el.classList.remove('active')); if(p !== 'home') document.getElementById('page-'+p).classList.add('active'); if(p === 'history') renderHistory(); if(p === 'debt') renderDebt(); if(p === 'settings') renderRules(); toggleMenu(); }
+    function renderRules() { const container = document.getElementById('rules-container'); container.innerHTML = priceRules.map((rule, index) => `<div style="display:flex; gap:5px; margin-bottom:5px;">Dưới <input type="number" value="${rule.km}" onchange="priceRules[${index}].km=parseFloat(this.value)" style="width:40px;"> km = <input type="number" value="${rule.price}" onchange="priceRules[${index}].price=parseInt(this.value)" style="width:70px;"> <span onclick="priceRules.splice(${index},1);renderRules()">×</span></div>`).join(''); document.getElementById('price_next_km').value = nextKmPrice; }
     function addNewRule() { priceRules.push({km: 5, price: 30000}); renderRules(); }
-    function saveAllSettings() { nextKmPrice = parseInt(document.getElementById('price_next_km').value); localStorage.setItem('sqt_rules', JSON.stringify(priceRules)); localStorage.setItem('sqt_next_price', nextKmPrice); alert("Đã lưu!"); }
+    function saveAllSettings() { nextKmPrice = parseInt(document.getElementById('price_next_km').value); localStorage.setItem('sqt_rules', JSON.stringify(priceRules)); localStorage.setItem('sqt_next_price', nextKmPrice); alert("Lưu thành công!"); }
     function cancelOrder() { if(confirm("Hủy đơn?")) resetUI(); }
     
     window.onload = () => { updateLocation(); map.invalidateSize(); };
